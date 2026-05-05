@@ -1,16 +1,16 @@
 # 🐾 AI Animal Classifier (Deep Learning Web App)
 
-A fully functional **AI-powered Animal Classification Web Application** built using **Deep Learning (MobileNetV2)**, **FastAPI**, and **Streamlit UI**.
+A professional **AI-powered Animal Classification Web Application** built using **MobileNetV2 (Transfer Learning)**, **FastAPI**, and **Streamlit UI**.
 
 ---
 
-## 🚀 Live Features
+## 🚀 Features
 
-* 📤 Upload an image
-* 🤖 AI predicts the animal
-* 📊 Shows confidence score
-* 🎨 Beautiful modern UI (Streamlit + Custom CSS)
-* ⚡ Fast API-based prediction
+* 📤 Upload animal image
+* 🤖 AI predicts animal class
+* 📊 Confidence score display
+* 🎨 Modern Streamlit UI (custom CSS)
+* ⚡ Fast prediction via API
 
 ---
 
@@ -55,63 +55,42 @@ A fully functional **AI-powered Animal Classification Web Application** built us
 ### 🔹 Frontend
 
 * Streamlit
-* Custom CSS (Glassmorphism UI)
+* Custom CSS
 
 ---
 
 ## 📂 Project Structure
 
-```bash
-AI-Animal-Classifier/
+```bash id="localstruct"
+CNN/
 │
-├── model/
-│   ├── multi_animal_model.h5
-│   └── class_names.npy
-│
-├── backend/
-│   └── main.py          # FastAPI server
-│
-├── frontend/
-│   └── app.py           # Streamlit UI
-│
-├── dataset/
-│   └── raw-img/         # training dataset
-│
-├── notebook/
-│   └── train.ipynb      # training notebook
-│
-├── requirements.txt
-└── README.md
+├── dataset/                 # training data
+├── animal_CNN.ipynb         # training notebook
+├── app.py                   # Streamlit frontend
+├── main.py                  # FastAPI backend
+├── class_names.npy          # class labels
+├── multi_animal_model.h5    # trained model
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Setup & Run
 
-### 1️⃣ Clone Repository
+### 1️⃣ Install Dependencies
 
-```bash
-git clone https://github.com/your-username/AI-Animal-Classifier.git
-cd AI-Animal-Classifier
-```
-
----
-
-### 2️⃣ Install Dependencies
-
-```bash
+```bash id="inst"
 pip install -r requirements.txt
 ```
 
 ---
 
-### 3️⃣ Run Backend (FastAPI)
+### 2️⃣ Run Backend (API)
 
-```bash
-uvicorn backend.main:app --reload --port 9000
+```bash id="api"
+uvicorn main:app --reload --port 9000
 ```
 
-👉 Open:
+👉 Open API docs:
 
 ```
 http://127.0.0.1:9000/docs
@@ -119,10 +98,10 @@ http://127.0.0.1:9000/docs
 
 ---
 
-### 4️⃣ Run Frontend (Streamlit)
+### 3️⃣ Run Frontend (Streamlit)
 
-```bash
-streamlit run frontend/app.py
+```bash id="ui"
+streamlit run app.py
 ```
 
 ---
@@ -137,7 +116,7 @@ streamlit run frontend/app.py
 
 #### Response:
 
-```json
+```json id="resp"
 {
   "prediction": "dog",
   "confidence": 0.95
@@ -148,25 +127,24 @@ streamlit run frontend/app.py
 
 ## 🎨 UI Highlights
 
-* Gradient animated background
+* Gradient background
 * Glassmorphism cards
 * Image preview
 * Confidence progress bar
-* Responsive layout
-* Developer profile section
+* Smooth animations
 
 ---
 
 ## 📊 Model Workflow
 
-1. Load dataset (multi-class)
-2. Check imbalance
+1. Load dataset
+2. Check class imbalance
 3. Apply class weights
 4. Preprocess using MobileNetV2
-5. Train model (Transfer Learning)
-6. Evaluate (Confusion Matrix + Report)
+5. Train model
+6. Evaluate (confusion matrix + report)
 7. Save model
-8. Deploy via API + UI
+8. Deploy API + UI
 
 ---
 
@@ -182,21 +160,21 @@ AI/ML Developer
 
 ## 📄 License
 
-This project is for educational and portfolio purposes.
+This project is for educational and portfolio use.
 
 ---
 
 ## ❤️ Acknowledgment
 
-Built with passion using Deep Learning and modern web technologies.
+Built with passion using Deep Learning & AI.
 
 ---
 
 ## 🚀 Future Improvements
 
-* Multi-animal detection (object detection)
-* Cloud deployment (AWS / Render)
-* Mobile app integration
 * Real-time webcam classification
+* Multi-object detection
+* Cloud deployment
+* Mobile app integration
 
 ---
