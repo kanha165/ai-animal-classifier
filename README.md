@@ -153,8 +153,7 @@ streamlit run app.py
 **Kanha Patidar**
 AI/ML Developer
 
-* GitHub: https://github.com/your-username
-* LinkedIn: https://linkedin.com/in/your-profile
+
 
 ---
 
