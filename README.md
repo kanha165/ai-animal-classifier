@@ -22,6 +22,7 @@ A professional **AI-powered Animal Classification Web Application** built using 
 
 * **Classes (10):**
 
+
   * Butterfly 🦋
   * Cat 🐱
   * Chicken 🐔
