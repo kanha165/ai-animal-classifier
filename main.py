@@ -33,6 +33,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+
 # --- Introduction ---
 st.markdown("<h1>🌿 AI Animal  Classifier</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center; color:#7f8c8d;'>Upload an animal image to get instant identification from our cloud API.</p>", unsafe_allow_html=True)
