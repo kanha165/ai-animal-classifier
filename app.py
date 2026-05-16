@@ -1,107 +1,200 @@
 import streamlit as st
-import requests
 from PIL import Image
-import io
+import numpy as np
+import tensorflow as tf
 
-# --- Page Configuration ---
+# =========================================
+# PAGE CONFIG
+# =========================================
 st.set_page_config(
-    page_title="FaunaScan AI | Cloud Intelligence",
+    page_title="FaunaScan AI",
     page_icon="🌿",
     layout="wide"
 )
 
-# --- Custom Styling (Soft & Elegant Theme) ---
+# =========================================
+# CUSTOM CSS
+# =========================================
 st.markdown("""
-    <style>
-    .stApp {
-        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    }
-    .main-card {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    }
-    h1 {
-        color: #2c3e50;
-        font-weight: 800;
-        text-align: center;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #2ecc71;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+<style>
 
-# --- Introduction ---
-st.markdown("<h1>🌿 AI Animal  Classifier</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#7f8c8d;'>Upload an animal image to get instant identification from our cloud API.</p>", unsafe_allow_html=True)
+.stApp {
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+}
+
+h1 {
+    color: #2c3e50;
+    font-weight: 800;
+    text-align: center;
+}
+
+/* Updated Streamlit CSS selector for modern progress bars */
+div[data-testid="stProgressBar"] > div > div > div {
+    background-color: #2ecc71 !important;
+}
+
+.result-box {
+    background-color: #f0fdf4;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #bbf7d0;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =========================================
+# TITLE
+# =========================================
+st.markdown(
+    "<h1>🌿 AI Animal Classifier</h1>",
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    "<p style='text-align:center; color:#7f8c8d;'>Upload an animal image for instant AI prediction.</p>",
+    unsafe_allow_html=True
+)
+
 st.divider()
 
-# --- Main Layout ---
+# =========================================
+# LOAD MODEL (Thread-Safe Wrapper)
+# =========================================
+@st.cache_resource
+def load_model():
+    # Loading the model normally into memory
+    return tf.keras.models.load_model("multi_animal_model.h5")
+
+model = load_model()
+
+# =========================================
+# LOAD CLASS NAMES
+# =========================================
+@st.cache_resource
+def load_classes():
+    return np.load("class_names.npy", allow_pickle=True)
+
+class_names = load_classes()
+
+# =========================================
+# IMAGE SETTINGS
+# =========================================
+IMG_SIZE = 150
+
+# =========================================
+# IMAGE PREPROCESSING
+# =========================================
+def preprocess_image(image):
+    # Resize image
+    image = image.resize((IMG_SIZE, IMG_SIZE))
+
+    # Convert image to array
+    image = np.array(image)
+
+    # Normalize image
+    image = image / 255.0
+
+    # Add batch dimension
+    image = np.expand_dims(image, axis=0)
+
+    return image
+
+# =========================================
+# MAIN LAYOUT
+# =========================================
 col1, col2 = st.columns([1, 1], gap="large")
 
+# =========================================
+# LEFT SIDE
+# =========================================
 with col1:
-    st.subheader("📸 Upload Section")
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file:
-        # Convert to RGB to avoid transparency errors
-        image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.subheader("📸 Upload Image")
 
+    uploaded_file = st.file_uploader(
+        "Choose an image...",
+        type=["jpg", "jpeg", "png"]
+    )
+
+    if uploaded_file:
+        image = Image.open(uploaded_file).convert("RGB")
+
+        st.image(
+            image,
+            caption="Uploaded Image",
+            use_container_width=True
+        )
+
+# =========================================
+# RIGHT SIDE
+# =========================================
 with col2:
     st.subheader("🎯 Prediction Result")
-    
+
     if uploaded_file:
-        with st.spinner("Analyzing with API..."):
+        with st.spinner("Analyzing Image..."):
             try:
-                # --- API INTEGRATION ---
-                # Placeholder URL: Replace with your actual API endpoint
-                API_URL = "http://127.0.0.1:8000/predict" 
-                
-                # Preparing image for API
-                buf = io.BytesIO()
-                image.save(buf, format="JPEG")
-                byte_im = buf.getvalue()
-                
-                files = {"file": (uploaded_file.name, byte_im, "image/jpeg")}
-                response = requests.post(API_URL, files=files)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    
-                    # Mapping your specific API response keys
-                    animal_name = data.get("prediction", "Unknown")
-                    raw_confidence = data.get("confidence", 0)
-                    
-                    # Convert 0-1 range to 0-100%
-                    display_confidence = raw_confidence * 100
+                # preprocess image
+                processed_image = preprocess_image(image)
 
-                    # --- Success UI ---
-                    st.success(f"Analysis Complete!")
-                    
-                    st.markdown(f"""
-                        <div style="background-color: #f0fdf4; padding: 25px; border-radius: 15px; border: 1px solid #bbf7d0;">
-                            <h4 style="margin:0; color:#166534; font-size: 0.9rem;">IDENTIFIED SPECIES</h4>
-                            <h1 style="margin:0; text-align:left; color:#15803d;">{animal_name.upper()}</h1>
-                            <hr style="border: 0.5px solid #bbf7d0;">
-                            <p style="margin:0; color:#166534;"><b>Match Probability:</b> {display_confidence:.2f}%</p>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # Confidence Bar
-                    st.write("")
-                    st.progress(raw_confidence if raw_confidence <= 1 else 1.0)
-                    
-                else:
-                    st.error(f"API Error {response.status_code}: Could not fetch prediction.")
-                    
+                # CRITICAL FIX: Explicitly invoke model via __call__ method instead of .predict()
+                # This bypasses the multi-threading graph lock tracking issues in Streamlit
+                predictions_tensor = model(processed_image, training=False)
+                predictions = predictions_tensor.numpy()
+
+                # get highest prediction
+                predicted_index = np.argmax(predictions)
+
+                # confidence score
+                confidence = float(np.max(predictions))
+
+                # animal name
+                animal_name = class_names[predicted_index]
+
+                # =========================================
+                # SUCCESS MESSAGE
+                # =========================================
+                st.success("Analysis Complete!")
+
+                # =========================================
+                # RESULT CARD
+                # =========================================
+                st.markdown(
+                    f"""
+                    <div class="result-box">
+                        <h4 style="margin:0; color:#166534; font-size:0.9rem;">
+                            IDENTIFIED SPECIES
+                        </h4>
+                        <h1 style="margin-top:10px; margin-bottom:10px; text-align:left; color:#15803d;">
+                            {str(animal_name).upper()}
+                        </h1>
+                        <hr style="border:0.5px solid #bbf7d0;">
+                        <p style="margin:0; color:#166534; font-size:18px;">
+                            <b>Match Probability:</b> {confidence * 100:.2f}%
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # progress bar
+                st.write("")
+                st.progress(confidence)
+
             except Exception as e:
-                st.error(f"Connection Error: {e}")
-                st.info("Check if your API server is running and the URL is correct.")
+                st.error(f"Prediction Error: {e}")
     else:
-        st.info("Please upload an image to see the intelligence report.")
+        st.info("Please upload an image to see prediction.")
 
-# --- Footer ---
-st.markdown("<br><br><p style='text-align:center; color:#bdc3c7; font-size:0.8rem;'>FaunaScan v2.5 • Cloud API Powered</p>", unsafe_allow_html=True)
+# =========================================
+# FOOTER
+# =========================================
+st.markdown(
+    """
+    <br><br>
+    <p style='text-align:center; color:#bdc3c7; font-size:0.8rem;'>
+    FaunaScan v2.5 • Streamlit AI Powered
+    </p>
+    """,
+    unsafe_allow_html=True
+)
