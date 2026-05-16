@@ -3,129 +3,105 @@ import requests
 from PIL import Image
 import io
 
-# --- PAGE CONFIG (Professional & Clean) ---
+# --- Page Configuration ---
 st.set_page_config(
-    page_title="Animal AI | Enterprise Classifier",
-    page_icon="🐕",
-    layout="centered",
+    page_title="FaunaScan AI | Cloud Intelligence",
+    page_icon="🌿",
+    layout="wide"
 )
 
-# --- CLEAN CUSTOM CSS ---
+# --- Custom Styling (Soft & Elegant Theme) ---
 st.markdown("""
     <style>
-    /* Global Reset */
-    .main {
-        background-color: #f8f9fa;
+    .stApp {
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
     }
-    
-    /* Typography */
-    h1, h2, h3 {
-        color: #1e293b;
-        font-family: 'Inter', -apple-system, sans-serif;
-        font-weight: 700;
+    .main-card {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     }
-
-    /* Standard Card Style */
-    .status-card {
-        background-color: white;
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-    }
-
-    /* Professional Button */
-    .stButton>button {
-        width: 100%;
-        background-color: #2563eb !important;
-        color: white !important;
-        border-radius: 8px !important;
-        border: none !important;
-        padding: 10px 0px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease;
-    }
-    
-    .stButton>button:hover {
-        background-color: #1d4ed8 !important;
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
-    }
-
-    /* Metric Styling */
-    .metric-text {
-        font-size: 2rem;
+    h1 {
+        color: #2c3e50;
         font-weight: 800;
-        color: #2563eb;
+        text-align: center;
     }
-
-    /* Hide unnecessary elements */
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
+    .stProgress > div > div > div > div {
+        background-color: #2ecc71;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR (Technical Info) ---
-with st.sidebar:
-    st.title("⚙️ System Info")
-    st.info("**Model:** MobileNetV2\n\n**Accuracy:** 94.2%\n\n**Input:** 150x150 RGB")
-    st.divider()
-    st.markdown("### Developer\n**Kanha Patidar**\n*AI/ML Engineer*")
-    st.caption("© 2026 Animal AI Systems")
-
-# --- MAIN UI ---
-st.title("🐾 Animal Classification System")
-st.markdown("Upload an image for high-precision animal identification using Deep Learning.")
-
-# Upload Section
-with st.container():
-    uploaded_file = st.file_uploader("Drop image here or click to browse", type=["jpg", "png", "jpeg"])
-
-if uploaded_file:
-    col1, col2 = st.columns([1, 1], gap="medium")
-    
-    with col1:
-        img = Image.open(uploaded_file)
-        st.image(img, caption="Target Image", use_container_width=True)
-        predict_btn = st.button("Run Inference")
-
-    with col2:
-        if predict_btn:
-            with st.spinner('Running neural network...'):
-                try:
-                    # API Request
-                    buf = io.BytesIO()
-                    img.save(buf, format='JPEG')
-                    files = {"file": ("image.jpg", buf.getvalue(), "image/jpeg")}
-                    
-                    response = requests.post("http://127.0.0.1:9000/predict", files=files)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        animal = data['prediction'].capitalize()
-                        conf = data['confidence']
-
-                        # Result Display
-                        st.markdown('<div class="status-card">', unsafe_allow_html=True)
-                        st.subheader("Results")
-                        st.markdown(f"Detected: <span class='metric-text'>{animal}</span>", unsafe_allow_html=True)
-                        
-                        # Confidence Bar
-                        st.write(f"Confidence Score: {conf*100:.1f}%")
-                        st.progress(conf)
-                        
-                        if conf > 0.85:
-                            st.success("Verified Match")
-                        else:
-                            st.warning("Low Confidence Match")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                    else:
-                        st.error("Server Error: Unable to process prediction.")
-                except Exception as e:
-                    st.error(f"Error: {e}")
-        else:
-            st.info("Click 'Run Inference' to analyze the image.")
-
-# --- FOOTER (Minimal) ---
+# --- Introduction ---
+st.markdown("<h1>🌿 AI Animal  Classifier</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#7f8c8d;'>Upload an animal image to get instant identification from our cloud API.</p>", unsafe_allow_html=True)
 st.divider()
-st.caption("Animal AI Enterprise | Robust Computer Vision Solutions")
+
+# --- Main Layout ---
+col1, col2 = st.columns([1, 1], gap="large")
+
+with col1:
+    st.subheader("📸 Upload Section")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file:
+        # Convert to RGB to avoid transparency errors
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Uploaded Image", use_container_width=True)
+
+with col2:
+    st.subheader("🎯 Prediction Result")
+    
+    if uploaded_file:
+        with st.spinner("Analyzing with API..."):
+            try:
+                # --- API INTEGRATION ---
+                # Placeholder URL: Replace with your actual API endpoint
+                API_URL = "http://127.0.0.1:8000/predict" 
+                
+                # Preparing image for API
+                buf = io.BytesIO()
+                image.save(buf, format="JPEG")
+                byte_im = buf.getvalue()
+                
+                files = {"file": (uploaded_file.name, byte_im, "image/jpeg")}
+                response = requests.post(API_URL, files=files)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Mapping your specific API response keys
+                    animal_name = data.get("prediction", "Unknown")
+                    raw_confidence = data.get("confidence", 0)
+                    
+                    # Convert 0-1 range to 0-100%
+                    display_confidence = raw_confidence * 100
+
+                    # --- Success UI ---
+                    st.success(f"Analysis Complete!")
+                    
+                    st.markdown(f"""
+                        <div style="background-color: #f0fdf4; padding: 25px; border-radius: 15px; border: 1px solid #bbf7d0;">
+                            <h4 style="margin:0; color:#166534; font-size: 0.9rem;">IDENTIFIED SPECIES</h4>
+                            <h1 style="margin:0; text-align:left; color:#15803d;">{animal_name.upper()}</h1>
+                            <hr style="border: 0.5px solid #bbf7d0;">
+                            <p style="margin:0; color:#166534;"><b>Match Probability:</b> {display_confidence:.2f}%</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Confidence Bar
+                    st.write("")
+                    st.progress(raw_confidence if raw_confidence <= 1 else 1.0)
+                    
+                else:
+                    st.error(f"API Error {response.status_code}: Could not fetch prediction.")
+                    
+            except Exception as e:
+                st.error(f"Connection Error: {e}")
+                st.info("Check if your API server is running and the URL is correct.")
+    else:
+        st.info("Please upload an image to see the intelligence report.")
+
+# --- Footer ---
+st.markdown("<br><br><p style='text-align:center; color:#bdc3c7; font-size:0.8rem;'>FaunaScan v2.5 • Cloud API Powered</p>", unsafe_allow_html=True)
